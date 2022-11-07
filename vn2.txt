@@ -1,0 +1,510 @@
+#include<TF1.h>
+#include<TH1D.h>
+#include<TRandom.h>
+#include<stdio.h>
+#include<math.h>
+#include<TColor.h>
+#include<TMath.h>
+void TestToyFull()
+//void distProd( std::string outFileName )
+{//Declaration of the variables
+        static const Int_t nevt1=1000;
+        static const Int_t npart=1000;
+        double mx,mn,sumevt;
+        double sumpart2,sumpart3,sumpart4;
+        double sumevt2,sumevt3,sumevt4,sumall2,sumall3,sumall4;
+        double Q2sq2,Q2sq3,Q2sq4;
+        mn=0.;sumevt=0.;mx=2*TMath::Pi();
+        sumevt2=0;sumevt3=0;sumevt4=0;
+        double array[3][nevt1];
+        double inpv2,inpv3,inpv4;inpv2=0.1;inpv3=0.05;inpv4=0.03;
+//DEfine the function here
+        TF1*h1=new TF1("h1","(1+2*[0]*cos(2*x)+2*[1]*cos(3*x)+2*[2]*cos(4*x))",mn,mx);
+        h1->SetParameter(0,inpv2);
+        h1->SetParameter(1,inpv3);
+        h1->SetParameter(2,inpv4);
+//Generate the 10,000 events
+for (Int_t j=0;j<nevt1;j++)
+{
+        double q2cos,q2sin,q3cos,q3sin,q4cos,q4sin;
+        q2cos=0;q2sin=0;q3cos=0;q3sin=0;q4cos=0;q4sin=0;
+//Generate the 1,000 particles
+        for (Int_t k=0;k<npart;k++)
+        {
+        double phi=h1->GetRandom();
+        q2cos+=cos(2*phi);q2sin+=sin(2*phi);
+        q3cos+=cos(3*phi);q3sin+=sin(3*phi);
+        q4cos+=cos(4*phi);q4sin+=sin(4*phi);
+         }
+        Q2sq2=0;Q2sq3=0;Q2sq4=0;
+        sumpart2=0;sumpart3=0;sumpart4=0;
+
+//The multiplication of (a+bi)(a-bi) = a^2+b^2
+ Q2sq2=(q2cos*q2cos)+(q2sin*q2sin);
+        Q2sq3=(q3cos*q3cos)+(q3sin*q3sin);
+        Q2sq4=(q4cos*q4cos)+(q4sin*q4sin);
+//average of sum over particles
+        sumpart2=((Q2sq2-npart)/(npart*(npart-1)));
+        sumpart3=((Q2sq3-npart)/(npart*(npart-1)));
+        sumpart4=((Q2sq4-npart)/(npart*(npart-1)));
+//Store the number in array
+{
+{
+        array[0][j]=sumpart2;//storing the <2> of each event in array
+        array[1][j]=sumpart3;
+        array[2][j]=sumpart4;
+
+}
+
+
+}//end of part of store number
+//sum over events
+        sumevt2+=sumpart2;
+        sumevt3+=sumpart3;
+        sumevt4+=sumpart4;
+}
+//average of sum over particles and events
+        sumall2=sumevt2/(nevt1);
+        sumall3=sumevt3/(nevt1);
+        sumall4=sumevt4/(nevt1);
+        //cout<<sumall<<endl;
+//viscosity v2,v3 and v4
+        double v_2,v_3,v_4;
+        v_2=sqrt(sumall2);
+        v_3=sqrt(sumall3);
+        v_4=(sqrt(sumall4));
+//the part to calulate the s^2,sigma<<2>> and simga v_n
+{
+double e[1][3];//build the array of sum((<2>_i-<<2>>)^2) by e
+e[0][0]=0;
+e[0][1]=0;
+e[0][2]=0;
+double l[3][nevt1];
+for(Int_t a=0;a<nevt1;a++)
+{
+        l[0][a]=array[0][a]-sumall2;//store every delta of <2>_i and <<2>>
+        l[1][a]=array[1][a]-sumall3;
+        l[2][a]=array[2][a]-sumall4;
+        e[0][0]+=(l[0][a])*(l[0][a]);//sum of every delta square
+        e[0][1]+=(l[1][a]*l[1][a]);
+        e[0][2]+=(l[2][a]*l[2][a]);
+
+}
+        double s[1][3],sigma210k,sigma310k,sigma410k;
+        s[0][0]=sqrt(e[0][0]/(nevt1-1));//*e[0][0]/(10000-1));//calculation of the sd of <2>
+        s[0][1]=sqrt(e[0][1]/(nevt1-1));//*e[0][1]/(10000-1));
+        s[0][2]=sqrt(e[0][2]/(nevt1-1));//*e[0][2]/(10000-1));
+        sigma210k=(s[0][0]/sqrt(nevt1))/(2*sqrt(sumall2));
+        sigma310k=(s[0][1]/sqrt(nevt1))/(2*sqrt(sumall3));
+        sigma410k=(s[0][2]/sqrt(nevt1))/(2*sqrt(sumall4));
+
+        cout<<"v2 of "<< nevt1/1000<<",000" << " events is" << v_2<<"+-"<<sigma210k<<endl;//sigma<<2>>=s/sqrt(Nevt)
+        cout<<"v3 of "<< nevt1/1000<<",000" << " events is" << v_3<<"+-"<<sigma310k<<endl;//sigma v= sigma<<2>>/(2*sqrt(<<2>>))
+        cout<<"v4 of "<< nevt1/1000<<",000" << " events is" << v_4<<"+-"<<sigma410k<<endl;
+}
+
+{//The second loop of 10,000 event//
+
+//Declaration of the variables
+        static const Int_t nevt2=10000;//1000
+        static const Int_t npart=1000;
+        double mx,mn,sumevt;
+        double sumpart2,sumpart3,sumpart4;
+        double sumevt2,sumevt3,sumevt4,sumall2,sumall3,sumall4;
+        double Q2sq2,Q2sq3,Q2sq4;
+        mn=0.;sumevt=0.;mx=2*TMath::Pi();
+        sumevt2=0;sumevt3=0;sumevt4=0;
+        double array1[3][nevt2];
+        //double v2,v3,v4;v2=0.1;v3=0.05;v4=0.03;
+//DEfine the function here
+        TF1*h1=new TF1("h1","(1+2*[0]*cos(2*x)+2*[1]*cos(3*x)+2*[2]*cos(4*x))",mn,mx);
+        h1->SetParameter(0,inpv2);
+        h1->SetParameter(1,inpv3);
+        h1->SetParameter(2,inpv4);
+//Generate the 1,000 events
+for (Int_t m=0;m<nevt2;m++)
+{
+        double q2cos,q2sin,q3cos,q3sin,q4cos,q4sin;
+        q2cos=0;q2sin=0;q3cos=0;q3sin=0;q4cos=0;q4sin=0;
+//Generate the 1,000 particles
+        for (Int_t r=0;r<npart;r++)
+        {
+        double phi=h1->GetRandom();
+        q2cos+=cos(2*phi);q2sin+=sin(2*phi);
+        q3cos+=cos(3*phi);q3sin+=sin(3*phi);
+        q4cos+=cos(4*phi);q4sin+=sin(4*phi);
+         }
+        Q2sq2=0;Q2sq3=0;Q2sq4=0;
+        sumpart2=0;sumpart3=0;sumpart4=0;
+
+//The multiplication of (a+bi)(a-bi) = a^2+b^2
+        Q2sq2=(q2cos*q2cos)+(q2sin*q2sin);
+        Q2sq3=(q3cos*q3cos)+(q3sin*q3sin);
+        Q2sq4=(q4cos*q4cos)+(q4sin*q4sin);
+//average of sum over particles
+        sumpart2=((Q2sq2-npart)/(npart*(npart-1)));
+        sumpart3=((Q2sq3-npart)/(npart*(npart-1)));
+        sumpart4=((Q2sq4-npart)/(npart*(npart-1)));
+//Store the number in array
+{
+{
+        array1[0][m]=sumpart2;//storing the <2> of each event in array
+        array1[1][m]=sumpart3;
+        array1[2][m]=sumpart4;
+
+}
+
+
+}//end of part of store number
+//sum over events
+        sumevt2+=sumpart2;
+        sumevt3+=sumpart3;
+        sumevt4+=sumpart4;
+}
+//average of sum over particles and events
+        sumall2=sumevt2/(nevt2);
+ sumall3=sumevt3/(nevt2);
+        sumall4=sumevt4/(nevt2);
+        //cout<<sumall<<endl;
+//viscosity v2,v3 and v4
+        double v_21000,v_31000,v_41000;
+        v_21000=sqrt(sumall2);
+        v_31000=sqrt(sumall3);
+        v_41000=(sqrt(sumall4));
+//the part to calulate the s^2,sigma<<2>> and simga v_n
+{
+double e1[1][3];//build the array of sum((<2>_i-<<2>>)^2) by e
+e1[0][0]=0;
+e1[0][1]=0;
+e1[0][2]=0;
+double l1[3][nevt2];
+for(Int_t b=0;b<nevt2;b++)
+{
+        l1[0][b]=array1[0][b]-sumall2;//store every delta of <2>_i and <<2>>
+        l1[1][b]=array1[1][b]-sumall3;
+        l1[2][b]=array1[2][b]-sumall4;
+        e1[0][0]+=(l1[0][b])*(l1[0][b]);//sum of every delta square
+        e1[0][1]+=(l1[1][b]*l1[1][b]);
+        e1[0][2]+=(l1[2][b]*l1[2][b]);
+
+}
+        double s1[1][3],sigma21k,sigma31k,sigma41k;
+        s1[0][0]=sqrt(e1[0][0]/(nevt2-1));//*e[0][0]/(10000-1));//calculation of the sd of <2>
+        s1[0][1]=sqrt(e1[0][1]/(nevt2-1));//*e[0][1]/(10000-1));
+        s1[0][2]=sqrt(e1[0][2]/(nevt2-1));//*e[0][2]/(10000-1));
+        sigma21k=(s1[0][0]/sqrt(nevt2))/(2*sqrt(sumall2));
+        sigma31k=(s1[0][1]/sqrt(nevt2))/(2*sqrt(sumall3));
+        sigma41k=(s1[0][2]/sqrt(nevt2))/(2*sqrt(sumall4));
+
+        cout<<"v2 of "<< nevt2/1000<<",000"<< " events is" << v_21000<<"+-"<<sigma21k<<endl;//sigma<<2>>=s/sqrt(Nevt)
+        cout<<"v3 of "<< nevt2/1000<<",000"<< " events is" << v_31000<<"+-"<<sigma31k<<endl;//sigma v= sigma<<2>>/(2*sqrt(<<2>>))
+cout<<"v4 of "<< nevt2/1000<<",000"<< " events is" << v_41000<<"+-"<<sigma41k<<endl;
+}
+}
+
+{//The third loop of 50,000 event//
+
+//Declaration of the variables
+        static const Int_t nevt3=50000;//100000
+        static const Int_t npart=1000;
+        double mx,mn,sumevt;
+        double sumpart2,sumpart3,sumpart4;
+        double sumevt2,sumevt3,sumevt4,sumall2,sumall3,sumall4;
+        double Q2sq2,Q2sq3,Q2sq4;
+        mn=0.;sumevt=0.;mx=2*TMath::Pi();
+        sumevt2=0;sumevt3=0;sumevt4=0;
+        double array2[3][nevt3];
+//DEfine the function here
+        TF1*h1=new TF1("h1","(1+2*[0]*cos(2*x)+2*[1]*cos(3*x)+2*[2]*cos(4*x))",mn,mx);
+        h1->SetParameter(0,inpv2);
+        h1->SetParameter(1,inpv3);
+        h1->SetParameter(2,inpv4);
+//Generate the 100,000 events
+for (Int_t o=0;o<nevt3;o++)
+{
+        double q2cos,q2sin,q3cos,q3sin,q4cos,q4sin;
+        q2cos=0;q2sin=0;q3cos=0;q3sin=0;q4cos=0;q4sin=0;
+//Generate the 1,000 particles
+        for (Int_t p=0;p<npart;p++)
+        {
+        double phi=h1->GetRandom();
+        q2cos+=cos(2*phi);q2sin+=sin(2*phi);
+        q3cos+=cos(3*phi);q3sin+=sin(3*phi);
+        q4cos+=cos(4*phi);q4sin+=sin(4*phi);
+         }
+        Q2sq2=0;Q2sq3=0;Q2sq4=0;
+        sumpart2=0;sumpart3=0;sumpart4=0;
+
+//The multiplication of (a+bi)(a-bi) = a^2+b^2
+        Q2sq2=(q2cos*q2cos)+(q2sin*q2sin);
+        Q2sq3=(q3cos*q3cos)+(q3sin*q3sin);
+        Q2sq4=(q4cos*q4cos)+(q4sin*q4sin);
+//average of sum over particles
+        sumpart2=((Q2sq2-npart)/(npart*(npart-1)));
+        sumpart3=((Q2sq3-npart)/(npart*(npart-1)));
+        sumpart4=((Q2sq4-npart)/(npart*(npart-1)));
+//Store the number in array
+{
+{
+        array2[0][o]=sumpart2;//storing the <2> of each event in array
+        array2[1][o]=sumpart3;
+        array2[2][o]=sumpart4;
+
+}
+
+
+}//end of part of store number
+//sum over events
+        sumevt2+=sumpart2;
+        sumevt3+=sumpart3;
+        sumevt4+=sumpart4;
+}
+//average of sum over particles and events
+        sumall2=sumevt2/(nevt3);
+        sumall3=sumevt3/(nevt3);
+        sumall4=sumevt4/(nevt3);
+        //cout<<sumall<<endl;
+//viscosity v2,v3 and v4
+        double v_2100k,v_3100k,v_4100k;
+        v_2100k=sqrt(sumall2);
+        v_3100k=sqrt(sumall3);
+        v_4100k=(sqrt(sumall4));
+//the part to calulate the s^2,sigma<<2>> and simga v_n
+{
+double e2[1][3];//build the array of sum((<2>_i-<<2>>)^2) by e
+e2[0][0]=0;
+e2[0][1]=0;
+e2[0][2]=0;
+double l2[3][nevt3];
+for(Int_t q=0;q<nevt3;q++)
+{
+        l2[0][q]=array2[0][q]-sumall2;//store every delta of <2>_i and <<2>>
+        l2[1][q]=array2[1][q]-sumall3;
+        l2[2][q]=array2[2][q]-sumall4;
+        e2[0][0]+=(l2[0][q])*(l2[0][q]);//sum of every delta square
+        e2[0][1]+=(l2[1][q]*l2[1][q]);
+        e2[0][2]+=(l2[2][q]*l2[2][q]);
+}
+        double s2[1][3],sigma2100k,sigma3100k,sigma4100k;
+        s2[0][0]=sqrt(e2[0][0]/(nevt3-1));//*e[0][0]/(10000-1));//calculation of the sd of <2>
+        s2[0][1]=sqrt(e2[0][1]/(nevt3-1));//*e[0][1]/(10000-1));
+        s2[0][2]=sqrt(e2[0][2]/(nevt3-1));//*e[0][2]/(10000-1));
+        sigma2100k=(s2[0][0]/sqrt(nevt3))/(2*sqrt(sumall2));
+        sigma3100k=(s2[0][1]/sqrt(nevt3))/(2*sqrt(sumall3));
+        sigma4100k=(s2[0][2]/sqrt(nevt3))/(2*sqrt(sumall4));
+
+        cout<<"v2 of "<< nevt3/1000<<",000"<< " events is"<< v_2100k<<"+-"<<sigma2100k<<endl;//sigma<<2>>=s/sqrt(Nevt)
+        cout<<"v3 of "<< nevt3/1000<<",000"<< " events is"<< v_3100k<<"+-"<<sigma3100k<<endl;//sigma v= sigma<<2>>/(2*sqrt(<<2>>))
+        cout<<"v4 of "<< nevt3/1000<<",000"<< " events is"<< v_4100k<<"+-"<<sigma4100k<<endl;
+}
+}
+
+{//The fourth loop of 100,000 event//
+
+//Declaration of the variables
+        static const Int_t nevt4=100000;//100000
+        static const Int_t npart=1000;
+        double mx,mn,sumevt;
+        double sumpart2,sumpart3,sumpart4;
+        double sumevt2,sumevt3,sumevt4,sumall2,sumall3,sumall4;
+        double Q2sq2,Q2sq3,Q2sq4;
+        mn=0.;sumevt=0.;mx=2*TMath::Pi();
+        sumevt2=0;sumevt3=0;sumevt4=0;
+        double array3[3][nevt4];
+//DEfine the function here
+        TF1*h1=new TF1("h1","(1+2*[0]*cos(2*x)+2*[1]*cos(3*x)+2*[2]*cos(4*x))",mn,mx);
+        h1->SetParameter(0,inpv2);
+        h1->SetParameter(1,inpv3);
+        h1->SetParameter(2,inpv4);
+//Generate the 100,000 events
+for (Int_t z=0;z<nevt4;z++)
+{
+ double q2cos,q2sin,q3cos,q3sin,q4cos,q4sin;
+        q2cos=0;q2sin=0;q3cos=0;q3sin=0;q4cos=0;q4sin=0;
+//Generate the 1,000 particles
+        for (Int_t x=0;x<npart;x++)
+        {
+        double phi=h1->GetRandom();
+        q2cos+=cos(2*phi);q2sin+=sin(2*phi);
+        q3cos+=cos(3*phi);q3sin+=sin(3*phi);
+        q4cos+=cos(4*phi);q4sin+=sin(4*phi);
+         }
+        Q2sq2=0;Q2sq3=0;Q2sq4=0;
+        sumpart2=0;sumpart3=0;sumpart4=0;
+
+//The multiplication of (a+bi)(a-bi) = a^2+b^2
+        Q2sq2=(q2cos*q2cos)+(q2sin*q2sin);
+        Q2sq3=(q3cos*q3cos)+(q3sin*q3sin);
+        Q2sq4=(q4cos*q4cos)+(q4sin*q4sin);
+//average of sum over particles
+        sumpart2=((Q2sq2-npart)/(npart*(npart-1)));
+        sumpart3=((Q2sq3-npart)/(npart*(npart-1)));
+        sumpart4=((Q2sq4-npart)/(npart*(npart-1)));
+//Store the number in array
+{
+{
+        array3[0][o]=sumpart2;//storing the <2> of each event in array
+        array3[1][o]=sumpart3;
+        array3[2][o]=sumpart4;
+
+}
+
+
+}//end of part of store number
+//sum over events
+        sumevt2+=sumpart2;
+        sumevt3+=sumpart3;
+        sumevt4+=sumpart4;
+}
+//average of sum over particles and events
+        sumall2=sumevt2/(nevt4);
+        sumall3=sumevt3/(nevt4);
+ sumall4=sumevt4/(nevt4);
+        //cout<<sumall<<endl;
+//viscosity v2,v3 and v4
+        double v_250k,v_350k,v_450k;
+        v_250k=sqrt(sumall2);
+        v_350k=sqrt(sumall3);
+        v_450k=(sqrt(sumall4));
+//the part to calulate the s^2,sigma<<2>> and simga v_n
+{
+double e3[1][3];//build the array of sum((<2>_i-<<2>>)^2) by e
+e3[0][0]=0;
+e3[0][1]=0;
+e3[0][2]=0;
+double l3[3][nevt4];
+for(Int_t y=0;y<nevt4;y++)
+{
+        l3[0][q]=array3[0][q]-sumall2;//store every delta of <2>_i and <<2>>
+        l3[1][q]=array3[1][q]-sumall3;
+        l3[2][q]=array3[2][q]-sumall4;
+        e3[0][0]+=(l3[0][q])*(l3[0][q]);//sum of every delta square
+        e3[0][1]+=(l3[1][q]*l3[1][q]);
+        e3[0][2]+=(l3[2][q]*l3[2][q]);
+}
+        double s3[1][3],sigma250k,sigma350k,sigma450k;
+        s3[0][0]=sqrt(e3[0][0]/(nevt4-1));//*e[0][0]/(10000-1));//calculation of the sd of <2>
+        s3[0][1]=sqrt(e3[0][1]/(nevt4-1));//*e[0][1]/(10000-1));
+        s3[0][2]=sqrt(e3[0][2]/(nevt4-1));//*e[0][2]/(10000-1));
+        sigma250k=(s3[0][0]/sqrt(nevt4))/(2*sqrt(sumall2));
+        sigma350k=(s3[0][1]/sqrt(nevt4))/(2*sqrt(sumall3));
+        sigma450k=(s3[0][2]/sqrt(nevt4))/(2*sqrt(sumall4));
+
+        cout<<"v2 of "<< nevt4/1000<<",000"<< " events is"<< v_250k<<"+-"<<sigma250k<<endl;//sigma<<2>>=s/sqrt(Nevt)
+        cout<<"v3 of "<< nevt4/1000<<",000"<< " events is"<< v_350k<<"+-"<<sigma350k<<endl;//sigma v= sigma<<2>>/(2*sqrt(<<2>>))
+        cout<<"v4 of "<< nevt4/1000<<",000"<< " events is"<< v_450k<<"+-"<<sigma450k<<endl;
+}
+}
+
+//the part of histograms
+{
+// The constant input
+        TF1*v2=new TF1("v2","[0]+(TMath::Log10(x)*0)",0,1.5*TMath::Log10(nevt4));v2->SetParameter(0,inpv2);
+TF1*v3=new TF1("v3","[0]+(TMath::Log10(x)*0)",0,1.5*TMath::Log10(nevt4));v3->SetParameter(0,inpv3);
+        TF1*v4=new TF1("v4","[0]+(TMath::Log10(x)*0)",0,1.5*TMath::Log10(nevt4));v4->SetParameter(0,inpv4);
+//The histogram generating
+        TH1D*his1=new TH1D("his1","Hist of v2",1000000,0,1.5*TMath::Log10(nevt4));
+        int bin_num1k=his1->FindBin(TMath::Log10(nevt1));
+        int bin_num10k=his1->FindBin(TMath::Log10(nevt2));
+        int bin_num50k=his1->FindBin(TMath::Log10(nevt3));
+        int bin_num100k=his1->FindBin(TMath::Log10(nevt4));
+
+        his1->SetBinContent(bin_num1k,v_21000);
+        his1->SetBinError(bin_num1k,sigma21k);
+        his1->SetBinContent(bin_num10k,v_2);
+        his1->SetBinError(bin_num10k,sigma210k);
+        his1->SetBinContent(bin_num50k,v_250k);
+        his1->SetBinError(bin_num50k,sigma250k);
+        his1->SetBinContent(bin_num100k,v_2100k);
+        his1->SetBinError(bin_num100k,sigma2100k);
+        his1->SetMarkerStyle(20);
+        his1->SetMarkerColor(46);//46 is red+pink
+
+        TH1D*h2=new TH1D("h2","Hist of v3",1000000,0,1.5*TMath::Log10(nevt4));
+        h2->SetBinContent(bin_num1k,v_31000);
+        h2->SetBinError(bin_num1k,sigma31k);
+        h2->SetBinContent(bin_num10k,v_3);
+        h2->SetBinError(bin_num10k,sigma310k);
+        h2->SetBinContent(bin_num50k,v_350k);
+        h2->SetBinError(bin_num50k,sigma350k);
+        h2->SetBinContent(bin_num100k,v_3100k);
+        h2->SetBinError(bin_num100k,sigma3100k);
+        h2->SetMarkerStyle(20);
+        h2->SetMarkerColor(46);//46 is red+pink
+
+        TH1D*h3=new TH1D("h3","Hist of v4",1000000,0,1.5*TMath::Log10(nevt4));
+        h3->SetBinContent(bin_num1k,v_41000);
+        h3->SetBinError(bin_num1k,sigma41k);
+        h3->SetBinContent(bin_num10k,v_4);
+        h3->SetBinError(bin_num10k,sigma410k);
+        h3->SetBinContent(bin_num50k,v_450k); 
+ h3->SetBinContent(bin_num100k,v_4100k);
+        h3->SetBinError(bin_num100k,sigma4100k);
+        h3->SetMarkerStyle(20);
+        h3->SetMarkerColor(46);//46 is red+pink
+// The part of fill color in histo
+        TColor*cl1=new TColor(9001,1,0.5,0);//orange
+        TColor*cl2=new TColor(9002,0,1,0);//green
+        TColor*cl3=new TColor(9003,0,0,1);//blue
+
+        his1->SetFillColor(9001);
+        h2->SetFillColor(9002);
+        h3->SetFillColor(9003);
+
+//
+// The error of every v of any events
+        //1,000 events
+
+        //10,000 events
+
+        //100,000 events
+
+        //To Draw 3 things
+        TFile* fout = new TFile("TestToy.root", "recreate");//TFile
+        TCanvas * c1=new TCanvas("c1","c1",1000,500);
+        c1->Divide(3,1);//(1,3)
+        c1->cd(1);
+        his1->Draw();
+        his1->Draw("e same");
+        his1->GetYaxis()->SetTitle("v2");
+        his1->GetYaxis()->SetRangeUser(0,2*inpv2);
+        his1->GetXaxis()->SetTitle("log of No. of events");
+ v2->SetLineStyle(2);v2->Draw("same");
+
+        c1->cd(2);
+        h2->Draw();
+        h2->Draw("e same");
+        h2->GetYaxis()->SetTitle("v3");
+        h2->GetYaxis()->SetRangeUser(0,2*inpv3);
+        h2->GetXaxis()->SetTitle("log of No. of events");
+        v3->SetLineStyle(2);v3->Draw("same");
+
+        c1->cd(3);
+        h3->Draw();
+        h3->Draw("e same");
+        h3->GetYaxis()->SetTitle("v4");
+        h3->GetYaxis()->SetRangeUser(0,2*inpv4);
+        h3->GetXaxis()->SetTitle("log of No. of events");
+        v4->SetLineStyle(2);v4->Draw("same");
+        c1->Draw();
+
+        TFile* fout = new TFile("TestToyroot.root",  "recreate");
+        his1->Write();v2->Write("same");
+        h2->Write();v3->Write("same");
+        h3->Write();v4->Write("same");
+        fout->Close();
+        delete fout;
+}
+//the end of the part of histograms
+
+//The rot file generating part
+//void distProd( std::string outFileName )
+
+
+
+
+
+
+
+}
+                                                                                                                                                                                                                                                                                              

@@ -1,0 +1,261 @@
+#include<TF1.h>
+#include<TH1D.h>
+#include<TRandom.h>
+#include<stdio.h>
+#include<math.h>
+#include<TColor.h>
+#include<TMath.h>
+void vn4_2()
+//void distProd( std::string outFileName )
+{//Declaration of the variables
+        static const Int_t nevt1=1000;
+        static const Int_t npart=1000;
+        double mx,mn,sumevt;
+        double sumpart2,sumpart3,sumpart4;
+        double sumevt2,sumevt3,sumevt4,sumall2,sumall3,sumall4;
+        double Q2sq2,Q2sq3,Q2sq4;
+        mn=0.;sumevt=0.;mx=2*TMath::Pi();
+        sumevt2=0;sumevt3=0;sumevt4=0;
+        double array[3][nevt1];
+        double inpv2,inpv3,inpv4;inpv2=0.1;inpv3=0.05;inpv4=0.03;
+//DEfine the function here
+        TF1*h1=new TF1("h1","(1+2*[0]*cos(2*x)+2*[1]*cos(3*x)+2*[2]*cos(4*x))",mn,mx);
+        h1->SetParameter(0,inpv2);
+        h1->SetParameter(1,inpv3);
+        h1->SetParameter(2,inpv4);
+{//The second loop of 10,000 event//
+
+//Declaration of the variables
+        static const Int_t nevt=100000;//1000
+        static const Int_t mult=1000;
+        double mx,mn,sumevt;
+        double sumpart2,sumpart3,sumpart4;
+        double sumevt2,sumevt3,sumevt4,sumall2,sumall3,sumall4;
+        double Q2sq2,Q2sq3,Q2sq4,Q24,Q34,Q44;
+        mn=0.;sumevt=0.;mx=2*TMath::Pi();
+        sumevt2=0;sumevt3=0;sumevt4=0;
+        double c24,c34,c44;
+        double array1[3][nevt];
+        //double v2,v3,v4;v2=0.1;v3=0.05;v4=0.03;
+//DEfine the function here
+        TF1*h1=new TF1("h1","(1+2*[0]*cos(2*x)+2*[1]*cos(3*x)+2*[2]*cos(4*x))",mn,mx);
+        h1->SetParameter(0,inpv2);
+        h1->SetParameter(1,inpv3);
+        h1->SetParameter(2,inpv4);
+//Generate the 1,000 events
+for (Int_t m=0;m<nevt;m++)
+{
+        double q22cos,q22sin,q32cos,q32sin,q42cos,q42sin;
+        double q24cos,q24sin,q34cos,q34sin,q44cos,q44sin;
+        q22cos=0;q22sin=0;q32cos=0;q32sin=0;q42cos=0;q42sin=0;
+        q24cos=0;q24sin=0;q34cos=0;q34sin=0;q44cos=0;q44sin=0;
+//Generate the 1,000 particles
+        for (Int_t r=0;r<mult;r++)
+        {
+        double phi=h1->GetRandom();
+        q22cos+=cos(2*phi);q22sin+=sin(2*phi);
+        q32cos+=cos(3*phi);q32sin+=sin(3*phi);
+        q42cos+=cos(4*phi);q42sin+=sin(4*phi);
+        q24cos+=cos(2*2*phi); q24sin+=sin(2*2*phi);
+        q34cos+=cos(2*3*phi); q34sin+=sin(2*3*phi);
+        q44cos+=cos(2*4*phi); q44sin+=sin(2*4*phi);
+        Q2sq2=0;Q2sq3=0;Q2sq4=0;
+        Q2sq2=0;Q2sq3=0;Q2sq4=0;
+        sumpart2=0;sumpart3=0;sumpart4=0;
+
+//The multiplication of (a+bi)(a-bi) = a^2+b^2
+        Q2sq2=(q22cos*q22cos)+(q22sin*q22sin);
+        Q2sq3=(q32cos*q32cos)+(q32sin*q32sin);
+        Q2sq4=(q42cos*q42cos)+(q42sin*q42sin);
+//average of sum over particles
+        sumpart2=((Q2sq2-mult)/(mult*(mult-1)));
+        sumpart3=((Q2sq3-mult)/(mult*(mult-1)));
+        sumpart4=((Q2sq4-mult)/(mult*(mult-1)));
+//4-part
+      Q24 +=( ((q22cos*q22cos)+(q22sin*q22sin))*((q22cos*q22cos)+(q22sin*q22sin)))+ ((q24cos*q24cos)+(q24sin*q24sin)) -2*q22cos - 4*(mult-2)*((q22cos*q22cos)+(q22sin*q22sin))+2*mult*(mult-3);
+      Q24 /= mult*(mult-1)*(mult-2)*(mult-3);
+      Q34 +=( ((q32cos*q32cos)+(q32sin*q32sin))*((q32cos*q32cos)+(q32sin*q32sin)))+ ((q34cos*q34cos)+(q34sin*q34sin)) -2*q32cos - 4*(mult-2)*((q32cos*q32cos)+(q32sin*q32sin))+2*mult*(mult-3);
+      Q34 /= mult*(mult-1)*(mult-2)*(mult-3);
+      Q44 +=( ((q42cos*q42cos)+(q42sin*q42sin))*((q42cos*q42cos)+(q42sin*q42sin)))+ ((q44cos*q44cos)+(q44sin*q44sin)) -2*q42cos - 4*(mult-2)*((q42cos*q42cos)+(q42sin*q42sin))+2*mult*(mult-3);
+      Q44 /= mult*(mult-1)*(mult-2)*(mult-3);}
+//Store the number in array
+{
+{
+        array1[0][m]=sumpart2;//storing the <2> of each event in array
+        array1[1][m]=sumpart3;
+        array1[2][m]=sumpart4;
+
+}
+
+
+}//end of part of store number
+//sum over events
+        sumevt2+=sumpart2;
+        sumevt3+=sumpart3;
+        sumevt4+=sumpart4;
+}
+//average of sum over particles and events
+        sumall2=sumevt2/(nevt);
+        sumall3=sumevt3/(nevt);
+        sumall4=sumevt4/(nevt);
+        //cout<<sumall<<endl;
+//viscosity v2,v3 and v4
+        double v_21000,v_31000,v_41000;
+        v_21000=sqrt(sumall2);
+        v_31000=sqrt(sumall3);
+        v_41000=(sqrt(sumall4));
+
+
+        c24=Q24/nevt - 2*(sumall2*sumall2);
+        c34= Q34/nevt - 2*(sumall3*sumall3);
+        c44= Q44/nevt - 2*(sumall4*sumall4);
+        //set error is zero at first
+        double sv2=0,sv3=0,sv4=0;
+//      double outv2=TMath::Sqrt(Q2sq2/nevt),outv3=TMath::Sqrt(Q32/nevt),outv4=TMath::Sqrt(Q42/nevt);
+        double outv24=TMath::Sqrt(TMath::Sqrt(-1*c24)),outv34=TMath::Sqrt(TMath::Sqrt(-1*c34)),outv44=TMath::Sqrt(TMath::Sqrt(-1*c44));
+//the part to calulate the s^2,sigma<<2>> and simga v_n
+{
+double e1[1][3];//build the array of sum((<2>_i-<<2>>)^2) by e
+e1[0][0]=0;
+e1[0][1]=0;
+e1[0][2]=0;
+double l1[3][nevt];
+for(Int_t b=0;b<nevt;b++)
+{
+        l1[0][b]=array1[0][b]-sumall2;//store every delta of <2>_i and <<2>>
+        l1[1][b]=array1[1][b]-sumall3;
+        l1[2][b]=array1[2][b]-sumall4;
+        e1[0][0]+=(l1[0][b])*(l1[0][b]);//sum of every delta square
+        e1[0][1]+=(l1[1][b]*l1[1][b]);
+        e1[0][2]+=(l1[2][b]*l1[2][b]);
+
+}
+        double s1[1][3],sigma21k,sigma31k,sigma41k;
+        s1[0][0]=sqrt(e1[0][0]/(nevt-1));//*e[0][0]/(10000-1));//calculation of the sd of <2>
+        s1[0][1]=sqrt(e1[0][1]/(nevt-1));//*e[0][1]/(10000-1));
+        s1[0][2]=sqrt(e1[0][2]/(nevt-1));//*e[0][2]/(10000-1));
+        sigma21k=(s1[0][0]/sqrt(nevt))/(2*sqrt(sumall2));
+        sigma31k=(s1[0][1]/sqrt(nevt))/(2*sqrt(sumall3));
+        sigma41k=(s1[0][2]/sqrt(nevt))/(2*sqrt(sumall4));
+
+        cout<<"v2 of "<< nevt/1000<<",000"<< " events is" << v_21000<<"+-"<<sigma21k<<endl;//sigma<<2>>=s/sqrt(Nevt)
+        cout<<"v3 of "<< nevt/1000<<",000"<< " events is" << v_31000<<"+-"<<sigma31k<<endl;//sigma v= sigma<<2>>/(2*sqrt(<<2>>))
+        cout<<"v4 of "<< nevt/1000<<",000"<< " events is" << v_41000<<"+-"<<sigma41k<<endl;
+        cout<<"v2{4} of "<< nevt/1000<<",000"<< " events is" << outv24<<"+-"<<"0"<<endl;//sigma<<2>>=s/sqrt(Nevt)
+        cout<<"v3{4} of "<< nevt/1000<<",000"<< " events is" << outv34<<"+-"<<"0"<<endl;//sigma v= sigma<<2>>/(2*sqrt(<<2>>))
+        cout<<"v4{4} of "<< nevt/1000<<",000"<< " events is" << outv44<<"+-"<<"0"<<endl;
+}
+}
+//the part of histograms
+/*{
+// The constant input
+        TF1*v2=new TF1("v2","[0]+(TMath::Log10(x)*0)",0,1.5*TMath::Log10(nevt4));v2->SetParameter(0,inpv2);
+        TF1*v3=new TF1("v3","[0]+(TMath::Log10(x)*0)",0,1.5*TMath::Log10(nevt4));v3->SetParameter(0,inpv3);
+        TF1*v4=new TF1("v4","[0]+(TMath::Log10(x)*0)",0,1.5*TMath::Log10(nevt4));v4->SetParameter(0,inpv4);
+//The histogram generating
+        TH1D*his1=new TH1D("his1","Hist of v2",1000000,0,1.5*TMath::Log10(nevt4));
+        int bin_num1k=his1->FindBin(TMath::Log10(nevt1));
+        int bin_num10k=his1->FindBin(TMath::Log10(nevt2));
+        int bin_num50k=his1->FindBin(TMath::Log10(nevt3));
+        int bin_num100k=his1->FindBin(TMath::Log10(nevt4));
+
+ his1->SetBinContent(bin_num1k,v_21000);
+        his1->SetBinError(bin_num1k,sigma21k);
+        his1->SetBinContent(bin_num10k,v_2);
+        his1->SetBinError(bin_num10k,sigma210k);
+        his1->SetBinContent(bin_num50k,v_250k);
+        his1->SetBinError(bin_num50k,sigma250k);
+        his1->SetBinContent(bin_num100k,v_2100k);
+        his1->SetBinError(bin_num100k,sigma2100k);
+        his1->SetMarkerStyle(20);
+        his1->SetMarkerColor(46);//46 is red+pink
+
+        TH1D*h2=new TH1D("h2","Hist of v3",1000000,0,1.5*TMath::Log10(nevt4));
+        h2->SetBinContent(bin_num1k,v_31000);
+        h2->SetBinError(bin_num1k,sigma31k);
+        h2->SetBinContent(bin_num10k,v_3);
+        h2->SetBinError(bin_num10k,sigma310k);
+        h2->SetBinContent(bin_num50k,v_350k);
+        h2->SetBinError(bin_num50k,sigma350k);
+        h2->SetBinContent(bin_num100k,v_3100k);
+        h2->SetBinError(bin_num100k,sigma3100k);
+        h2->SetMarkerStyle(20);
+        h2->SetMarkerColor(46);//46 is red+pink
+
+        TH1D*h3=new TH1D("h3","Hist of v4",1000000,0,1.5*TMath::Log10(nevt4));
+        h3->SetBinContent(bin_num1k,v_41000);
+        h3->SetBinError(bin_num1k,sigma41k);
+        h3->SetBinContent(bin_num10k,v_4);
+        h3->SetBinError(bin_num10k,sigma410k);
+        h3->SetBinContent(bin_num50k,v_450k);
+        h3->SetBinError(bin_num50k,sigma450k);
+        h3->SetBinContent(bin_num100k,v_4100k);
+        h3->SetBinError(bin_num100k,sigma4100k);
+        h3->SetMarkerStyle(20);
+        h3->SetMarkerColor(46);//46 is red+pink
+// The part of fill color in histo
+        TColor*cl1=new TColor(9001,1,0.5,0);//orange
+        TColor*cl2=new TColor(9002,0,1,0);//green
+        TColor*cl3=new TColor(9003,0,0,1);//blue
+
+        his1->SetFillColor(9001);
+        h2->SetFillColor(9002);
+ h3->SetFillColor(9003);
+
+//
+// The error of every v of any events
+        //1,000 events
+
+        //10,000 events
+
+        //100,000 events
+
+        //To Draw 3 things
+        TFile* fout = new TFile("TestToy.root", "recreate");//TFile
+        TCanvas * c1=new TCanvas("c1","c1",1000,500);
+        c1->Divide(3,1);//(1,3)
+        c1->cd(1);
+        his1->Draw();
+        his1->Draw("e same");
+        his1->GetYaxis()->SetTitle("v2");
+        his1->GetYaxis()->SetRangeUser(0,2*inpv2);
+        his1->GetXaxis()->SetTitle("log of No. of events");
+        v2->SetLineStyle(2);v2->Draw("same");
+
+        c1->cd(2);
+        h2->Draw();
+        h2->Draw("e same");
+        h2->GetYaxis()->SetTitle("v3");
+        h2->GetYaxis()->SetRangeUser(0,2*inpv3);
+        h2->GetXaxis()->SetTitle("log of No. of events");
+        v3->SetLineStyle(2);v3->Draw("same");
+
+        c1->cd(3);
+        h3->Draw();
+        h3->Draw("e same");
+        h3->GetYaxis()->SetTitle("v4");
+        h3->GetYaxis()->SetRangeUser(0,2*inpv4);
+        h3->GetXaxis()->SetTitle("log of No. of events");
+        v4->SetLineStyle(2);v4->Draw("same");
+        c1->Draw();
+
+        TFile* fout = new TFile("TestToyroot.root",  "recreate");
+        his1->Write();v2->Write("same");
+        h2->Write();v3->Write("same");
+        h3->Write();v4->Write("same");
+        fout->Close();
+        delete fout;
+}
+//the end of the part of histograms
+
+//The rot file generating part
+//void distProd( std::string outFileName )
+
+
+*/
+
+
+
+
+}
+          
